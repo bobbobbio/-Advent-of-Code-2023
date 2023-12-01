@@ -1,0 +1,21 @@
+[profile.dev]
+opt-level = 3
+debug = true
+lto = 'thin'
+panic = 'abort'
+
+[profile.release]
+opt-level = 3
+debug = true
+lto = 'thin'
+panic = 'abort'
+
+[workspace]
+resolver = '2'
+members = [
+    'advent',
+    'advent_macro',
+    'one',
+    'parse',
+    'parse_macro',
+]
