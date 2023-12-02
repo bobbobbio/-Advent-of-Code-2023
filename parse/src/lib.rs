@@ -7,7 +7,7 @@ use prelude::*;
 use std::convert::Infallible;
 use std::marker::PhantomData;
 use std::{
-    io, iter, num,
+    fmt, io, iter, num,
     ops::{Deref, DerefMut},
     slice, str, vec,
 };
@@ -125,6 +125,9 @@ pub struct Comma;
 pub struct CommaSpace;
 
 #[derive(Debug, Clone, Copy)]
+pub struct SemiSpace;
+
+#[derive(Debug, Clone, Copy)]
 pub struct Dash;
 
 #[derive(Debug, Clone, Copy)]
@@ -145,8 +148,17 @@ pub struct TermWith<T>(PhantomData<T>);
 #[derive(Debug, Clone, Copy)]
 pub struct StartsWith<T>(PhantomData<T>);
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct List<T, Sep>(Vec<T>, PhantomData<Sep>);
+
+impl<T, Sep> fmt::Debug for List<T, Sep>
+where
+    T: fmt::Debug,
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.0.fmt(f)
+    }
+}
 
 #[derive(Clone, Debug)]
 pub struct Nil;
@@ -192,6 +204,13 @@ impl<T: HasParser> HasParser for List<T, SepBy<CommaSpace>> {
     #[into_parser]
     fn parser() -> _ {
         sep_by1(T::parser(), string(", ")).map(|v: Vec<_>| v.into())
+    }
+}
+
+impl<T: HasParser> HasParser for List<T, SepBy<SemiSpace>> {
+    #[into_parser]
+    fn parser() -> _ {
+        sep_by1(T::parser(), string("; ")).map(|v: Vec<_>| v.into())
     }
 }
 
