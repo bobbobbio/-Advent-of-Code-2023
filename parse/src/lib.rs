@@ -118,26 +118,45 @@ impl HasParser for String {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
-pub struct Comma;
+macro_rules! matching_parser {
+    ($name:ident, $c:expr) => {
+        #[derive(Debug, Clone, Copy)]
+        pub struct $name;
 
-#[derive(Debug, Clone, Copy)]
-pub struct CommaSpace;
+        impl HasParser for $name {
+            #[into_parser]
+            fn parser() -> _ {
+                $c.map(|_| Self)
+            }
+        }
+    };
+}
 
-#[derive(Debug, Clone, Copy)]
-pub struct SemiSpace;
+macro_rules! token {
+    ($name:ident, $c:expr) => {
+        matching_parser!($name, token($c));
+    };
+}
 
-#[derive(Debug, Clone, Copy)]
-pub struct Dash;
+macro_rules! string {
+    ($name:ident, $c:expr) => {
+        matching_parser!($name, string($c));
+    };
+}
 
-#[derive(Debug, Clone, Copy)]
-pub struct NewLine;
+macro_rules! many1_token {
+    ($name:ident, $c:expr) => {
+        matching_parser!($name, many1::<String, _, _>(token($c)));
+    };
+}
 
-#[derive(Debug, Clone, Copy)]
-pub struct Space;
-
-#[derive(Debug, Clone, Copy)]
-pub struct Spaces;
+token!(Comma, ',');
+string!(CommaSpace, ", ");
+string!(SemiSpace, "; ");
+token!(Dash, '-');
+token!(NewLine, '\n');
+token!(Space, ' ');
+many1_token!(Spaces, ' ');
 
 #[derive(Debug, Clone, Copy)]
 pub struct SepBy<T>(PhantomData<T>);
@@ -186,73 +205,24 @@ impl<T: HasParser> HasParser for List<T, Nil> {
     }
 }
 
-impl<T: HasParser> HasParser for List<T, SepBy<Comma>> {
+impl<T: HasParser, Sep: HasParser> HasParser for List<T, SepBy<Sep>> {
     #[into_parser]
     fn parser() -> _ {
-        sep_by1(T::parser(), token(',')).map(|v: Vec<_>| v.into())
+        sep_by1(T::parser(), Sep::parser()).map(|v: Vec<_>| v.into())
     }
 }
 
-impl<T: HasParser> HasParser for List<T, SepBy<Dash>> {
+impl<T: HasParser, Sep: HasParser> HasParser for List<T, TermWith<Sep>> {
     #[into_parser]
     fn parser() -> _ {
-        sep_by1(T::parser(), token('-')).map(|v: Vec<_>| v.into())
+        many1(T::parser().skip(Sep::parser())).map(|v: Vec<_>| v.into())
     }
 }
 
-impl<T: HasParser> HasParser for List<T, SepBy<CommaSpace>> {
+impl<T: HasParser, Sep: HasParser> HasParser for List<T, StartsWith<Sep>> {
     #[into_parser]
     fn parser() -> _ {
-        sep_by1(T::parser(), string(", ")).map(|v: Vec<_>| v.into())
-    }
-}
-
-impl<T: HasParser> HasParser for List<T, SepBy<SemiSpace>> {
-    #[into_parser]
-    fn parser() -> _ {
-        sep_by1(T::parser(), string("; ")).map(|v: Vec<_>| v.into())
-    }
-}
-
-impl<T: HasParser> HasParser for List<T, SepBy<NewLine>> {
-    #[into_parser]
-    fn parser() -> _ {
-        sep_by1(T::parser(), token('\n')).map(|v: Vec<_>| v.into())
-    }
-}
-
-impl<T: HasParser> HasParser for List<T, TermWith<NewLine>> {
-    #[into_parser]
-    fn parser() -> _ {
-        many1(T::parser().skip(token('\n'))).map(|v: Vec<_>| v.into())
-    }
-}
-
-impl<T: HasParser> HasParser for List<T, TermWith<Dash>> {
-    #[into_parser]
-    fn parser() -> _ {
-        many1(T::parser().skip(token('-'))).map(|v: Vec<_>| v.into())
-    }
-}
-
-impl<T: HasParser> HasParser for List<T, SepBy<Space>> {
-    #[into_parser]
-    fn parser() -> _ {
-        sep_by1(T::parser(), token(' ')).map(|v: Vec<_>| v.into())
-    }
-}
-
-impl<T: HasParser> HasParser for List<T, StartsWith<Spaces>> {
-    #[into_parser]
-    fn parser() -> _ {
-        many1(many1(token(' ')).map(|_: String| ()).with(T::parser())).map(|v: Vec<_>| v.into())
-    }
-}
-
-impl<T: HasParser> HasParser for List<T, SepBy<Spaces>> {
-    #[into_parser]
-    fn parser() -> _ {
-        sep_by1(T::parser(), many1(token(' ')).map(|_: String| ())).map(|v: Vec<_>| v.into())
+        many1(Sep::parser().with(T::parser())).map(|v: Vec<_>| v.into())
     }
 }
 
