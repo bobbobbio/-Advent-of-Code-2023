@@ -15,6 +15,7 @@ resolver = '2'
 members = [
     'advent',
     'advent_macro',
+    'four',
     'one',
     'parse',
     'parse_macro',

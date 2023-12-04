@@ -156,6 +156,7 @@ string!(SemiSpace, "; ");
 token!(Dash, '-');
 token!(NewLine, '\n');
 token!(Space, ' ');
+string!(SpaceBar, " |");
 many1_token!(Spaces, ' ');
 
 #[derive(Debug, Clone, Copy)]
@@ -222,7 +223,7 @@ impl<T: HasParser, Sep: HasParser> HasParser for List<T, TermWith<Sep>> {
 impl<T: HasParser, Sep: HasParser> HasParser for List<T, StartsWith<Sep>> {
     #[into_parser]
     fn parser() -> _ {
-        many1(Sep::parser().with(T::parser())).map(|v: Vec<_>| v.into())
+        many1(attempt(Sep::parser().with(T::parser()))).map(|v: Vec<_>| v.into())
     }
 }
 
