@@ -180,6 +180,29 @@ where
     }
 }
 
+impl<T, Sep> PartialEq<Self> for List<T, Sep>
+where
+    T: PartialEq,
+{
+    fn eq(&self, other: &Self) -> bool {
+        self.0.eq(&other.0)
+    }
+}
+
+impl<T, Sep> std::hash::Hash for List<T, Sep>
+where
+    T: std::hash::Hash,
+{
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: std::hash::Hasher,
+    {
+        self.0.hash(state)
+    }
+}
+
+impl<T, Sep> Eq for List<T, Sep> where T: Eq {}
+
 #[derive(Clone, Debug)]
 pub struct Nil;
 
