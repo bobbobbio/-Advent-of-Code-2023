@@ -30,8 +30,9 @@ SUCCESS = "That's the right answer!"
 FAIL = "That's not the right answer."
 FAIL_HIGH = "That's not the right answer; your answer is too high."
 FAIL_LOW = "That's not the right answer; your answer is too low."
+FAIL_TIMEOUT = "You gave an answer too recently"
 
-MSGS = [ALREADY_COMPLETE, SUCCESS, FAIL, FAIL_HIGH, FAIL_LOW]
+MSGS = [ALREADY_COMPLETE, SUCCESS, FAIL, FAIL_HIGH, FAIL_LOW, FAIL_TIMEOUT]
 
 def submit_question(name: str, day: int, part: int, dry_run: bool) -> int:
     p = subprocess.Popen(
