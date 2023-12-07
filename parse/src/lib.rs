@@ -229,6 +229,13 @@ impl<T: HasParser> HasParser for List<T, Nil> {
     }
 }
 
+impl<T: HasParser> HasParser for Vec<T> {
+    #[into_parser]
+    fn parser() -> _ {
+        many1(T::parser()).map(|v: Vec<_>| v)
+    }
+}
+
 impl<T: HasParser, Sep: HasParser> HasParser for List<T, SepBy<Sep>> {
     #[into_parser]
     fn parser() -> _ {
