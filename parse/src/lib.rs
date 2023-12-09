@@ -171,6 +171,12 @@ pub struct StartsWith<T>(PhantomData<T>);
 #[derive(Clone)]
 pub struct List<T, Sep>(Vec<T>, PhantomData<Sep>);
 
+impl<T, Sep> From<List<T, Sep>> for Vec<T> {
+    fn from(l: List<T, Sep>) -> Self {
+        l.0
+    }
+}
+
 impl<T, Sep> fmt::Debug for List<T, Sep>
 where
     T: fmt::Debug,

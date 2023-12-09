@@ -18,6 +18,7 @@ members = [
     'eight',
     'five',
     'four',
+    'nine',
     'one',
     'parse',
     'parse_macro',
