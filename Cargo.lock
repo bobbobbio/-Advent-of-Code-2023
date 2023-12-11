@@ -423,6 +423,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "ten"
+version = "0.1.0"
+dependencies = [
+ "advent",
+ "combine",
+ "parse",
+ "strum",
+ "strum_macros",
+]
+
+[[package]]
 name = "text2num"
 version = "2.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
