@@ -19,7 +19,7 @@ impl Card {
     fn matching_nums(&self) -> u32 {
         self.your_nums
             .iter()
-            .map(|n| self.winning_nums.contains(&n) as u32)
+            .map(|n| self.winning_nums.contains(n) as u32)
             .sum::<u32>()
     }
 

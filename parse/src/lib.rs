@@ -259,6 +259,12 @@ impl<T: HasParser, Sep: HasParser> HasParser for List<T, StartsWith<Sep>> {
     }
 }
 
+impl<T, Sep> Default for List<T, Sep> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<T, Sep> List<T, Sep> {
     pub fn new() -> Self {
         Self(vec![], PhantomData)
@@ -268,11 +274,11 @@ impl<T, Sep> List<T, Sep> {
         self.0.push(t);
     }
 
-    pub fn iter<'a>(&'a self) -> slice::Iter<'a, T> {
+    pub fn iter(&self) -> slice::Iter<'_, T> {
         self.0.iter()
     }
 
-    pub fn iter_mut<'a>(&'a mut self) -> slice::IterMut<'a, T> {
+    pub fn iter_mut(&mut self) -> slice::IterMut<'_, T> {
         self.0.iter_mut()
     }
 
@@ -290,7 +296,7 @@ impl<'a, T, Sep> IntoIterator for &'a List<T, Sep> {
     type IntoIter = slice::Iter<'a, T>;
 
     fn into_iter(self) -> Self::IntoIter {
-        (&self.0).into_iter()
+        self.0.iter()
     }
 }
 
@@ -299,7 +305,7 @@ impl<'a, T, Sep> IntoIterator for &'a mut List<T, Sep> {
     type IntoIter = slice::IterMut<'a, T>;
 
     fn into_iter(self) -> Self::IntoIter {
-        (&mut self.0).into_iter()
+        self.0.iter_mut()
     }
 }
 

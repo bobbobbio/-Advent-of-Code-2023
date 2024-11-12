@@ -84,8 +84,7 @@ impl Grid {
             .iter()
             .map(|l| l.iter().enumerate())
             .enumerate()
-            .map(|(row, iter)| iter.map(move |(column, c)| (column, row, *c)))
-            .flatten()
+            .flat_map(|(row, iter)| iter.map(move |(column, c)| (column, row, *c)))
     }
 
     fn square(&self, x: usize, y: usize) -> char {

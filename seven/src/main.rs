@@ -34,6 +34,7 @@ enum Card {
     A,
 }
 
+#[allow(clippy::enum_variant_names)]
 #[derive(Debug, PartialOrd, Ord, PartialEq, Eq)]
 enum Kind {
     HighCard,

@@ -175,7 +175,8 @@ fn part_two(input: Input) -> u128 {
     let graph = build_graph(&input);
     let mut curs: Vec<_> = graph
         .keys()
-        .filter_map(|n| n.0.ends_with("A").then(|| Search::new(n.clone())))
+        .filter(|n| n.0.ends_with("A"))
+        .map(|n| Search::new(n.clone()))
         .collect();
 
     let instr_len = input.instructions.len();

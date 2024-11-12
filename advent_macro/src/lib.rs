@@ -25,7 +25,7 @@ fn part_inner(input: TokenStream, part_number: usize) -> Result<File> {
         return Err(Error::new(args.span(), "too many inputs"));
     }
     let parsed_type = if let FnArg::Typed(pat_type) = args.first().unwrap() {
-        (&*pat_type.ty).clone()
+        (*pat_type.ty).clone()
     } else {
         return Err(Error::new(args.span(), "invalid input type"));
     };

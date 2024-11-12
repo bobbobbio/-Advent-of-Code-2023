@@ -30,22 +30,20 @@ impl RangeMap {
                 let self_end = self.src + self.len;
                 if range.start >= self_end {
                     unmapped.push(range);
+                } else if range_end <= self_end {
+                    mapped.push(Range {
+                        start: self.dest + range.start - self.src,
+                        len: range.len,
+                    });
                 } else {
-                    if range_end <= self_end {
-                        mapped.push(Range {
-                            start: self.dest + range.start - self.src,
-                            len: range.len,
-                        });
-                    } else {
-                        mapped.push(Range {
-                            start: self.dest + range.start - self.src,
-                            len: self_end - range.start,
-                        });
-                        unmapped.push(Range {
-                            start: self_end,
-                            len: range_end - self_end,
-                        });
-                    }
+                    mapped.push(Range {
+                        start: self.dest + range.start - self.src,
+                        len: self_end - range.start,
+                    });
+                    unmapped.push(Range {
+                        start: self_end,
+                        len: range_end - self_end,
+                    });
                 }
             }
         }

@@ -90,7 +90,7 @@ struct AttrKeyword<Kind> {
 
 impl<Kind> Spanned for AttrKeyword<Kind> {
     fn span(&self) -> Span {
-        self.span.clone()
+        self.span
     }
 }
 
@@ -130,8 +130,7 @@ pub fn parse_attr_map<Kind: AttrKeywordKind>(
         .collect::<Result<_>>()?;
     let attrs: Vec<_> = parsed_attrs
         .into_iter()
-        .map(|a| a.attrs.into_iter())
-        .flatten()
+        .flat_map(|a| a.attrs.into_iter())
         .collect();
 
     let mut attr_map = BTreeMap::new();

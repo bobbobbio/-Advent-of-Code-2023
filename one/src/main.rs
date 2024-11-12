@@ -18,7 +18,7 @@ fn part_one(input: List<NotWhitespace, TermWith<NewLine>>) -> u64 {
 }
 
 fn find_number(s: &str, reverse: bool) -> u64 {
-    let mut i = reverse.then_some(s.len() - 1).unwrap_or(0);
+    let mut i = if reverse { s.len() - 1 } else { 0 };
 
     while i < s.len() {
         if let Ok(n) = s[i..(i + 1)].parse() {
