@@ -146,7 +146,12 @@ fn download_input(name: &str, day: u32) -> Result<()> {
         .header("cookie", format!("session={}", aocd_token()?))
         .send()?;
 
-    fs::write(Path::new(name).join("input.txt"), resp.text()?)?;
+    let input_text = resp.text()?;
+    if input_text == "Puzzle inputs differ by user.  Please log in to get your puzzle input." {
+        bail!("session key invalid");
+    }
+
+    fs::write(Path::new(name).join("input.txt"), input_text)?;
     Ok(())
 }
 
