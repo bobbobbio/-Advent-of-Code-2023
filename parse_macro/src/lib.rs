@@ -45,9 +45,7 @@ fn into_parser_inner(input: TokenStream) -> Result<TokenStream> {
     let name = input.sig.ident;
     let block = input.block;
     Ok(quote! {
-        type Parser<Input: combine::Stream<Token = char>> = impl Parser<Input, Output = Self>;
-
-        fn #name<Input>() -> Self::Parser<Input>
+        fn #name<Input>() -> impl Parser<Input, Output = Self>
         where
             Input: ::combine::Stream<Token = char>,
         #block

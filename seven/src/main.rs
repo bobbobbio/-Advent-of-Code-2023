@@ -1,5 +1,3 @@
-#![feature(type_alias_impl_trait, impl_trait_in_assoc_type)]
-
 use advent::prelude::*;
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;

@@ -1,5 +1,3 @@
-#![feature(type_alias_impl_trait, impl_trait_in_assoc_type)]
-
 use combine::eof;
 use combine::parser::char::{alpha_num, spaces};
 use combine::stream::{easy, position};
@@ -22,10 +20,8 @@ pub mod prelude {
     pub use std::str::FromStr;
 }
 
-pub trait HasParser {
-    type Parser<Input: combine::Stream<Token = char>>: Parser<Input, Output = Self>;
-
-    fn parser<Input>() -> Self::Parser<Input>
+pub trait HasParser: Sized {
+    fn parser<Input>() -> impl Parser<Input, Output = Self>
     where
         Input: combine::Stream<Token = char>;
 }

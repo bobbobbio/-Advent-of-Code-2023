@@ -1,5 +1,3 @@
-#![feature(type_alias_impl_trait, impl_trait_in_assoc_type)]
-
 use advent::prelude::*;
 
 fn extrapolate(input: List<i64, SepBy<Space>>) -> Vec<Vec<i64>> {
