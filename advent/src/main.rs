@@ -126,24 +126,30 @@ harness!();
 
 "#;
 
-const YEAR: u32 = 2023;
+fn aoc_year() -> Result<u32> {
+    Ok(fs::read_to_string("aoc-year")
+        .with_context(|| "year missing: ./aoc-year")?
+        .trim()
+        .parse()?)
+}
 
-fn aocd_token() -> Result<String> {
+fn aoc_token() -> Result<String> {
     Ok(fs::read_to_string(
         homedir::my_home()?
             .ok_or_else(|| anyhow!("home directory set"))?
-            .join(".config/aocd/token"),
+            .join(".config/aoc/token"),
     )
-    .with_context(|| "session key missing: ~/.config/aocd/token")?
+    .with_context(|| "session key missing: ~/.config/aoc/token")?
     .trim()
     .into())
 }
 
 fn download_input(name: &str, day: u32) -> Result<()> {
+    let year = aoc_year()?;
     let client = reqwest::blocking::Client::new();
     let resp = client
-        .get(format!("https://adventofcode.com/{YEAR}/day/{day}/input"))
-        .header("cookie", format!("session={}", aocd_token()?))
+        .get(format!("https://adventofcode.com/{year}/day/{day}/input"))
+        .header("cookie", format!("session={}", aoc_token()?))
         .send()?;
 
     let input_text = resp.text()?;
@@ -264,7 +270,8 @@ struct AnswerBody {
 }
 
 fn send_answer(day: u32, part: u32, result: &str, dry_run: bool) -> Result<Option<String>> {
-    let url = format!("https://adventofcode.com/{YEAR}/day/{day}/answer");
+    let year = aoc_year()?;
+    let url = format!("https://adventofcode.com/{year}/day/{day}/answer");
     let body = AnswerBody {
         answer: result.into(),
         level: part,
@@ -276,7 +283,7 @@ fn send_answer(day: u32, part: u32, result: &str, dry_run: bool) -> Result<Optio
         let client = reqwest::blocking::Client::new();
         let resp = client
             .post(url)
-            .header("cookie", format!("session={}", aocd_token()?))
+            .header("cookie", format!("session={}", aoc_token()?))
             .json(&body)
             .send()?;
         Ok(Some(resp.text()?))
