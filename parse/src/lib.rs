@@ -289,6 +289,17 @@ impl<T, Sep> List<T, Sep> {
     pub fn reserve(&mut self, additional: usize) {
         self.0.reserve(additional)
     }
+
+    pub fn pop(&mut self) -> Option<T> {
+        self.0.pop()
+    }
+}
+
+impl<A, Sep> std::iter::Extend<A> for List<A, Sep> {
+    fn extend<T>(&mut self, iter: T)
+        where T: IntoIterator<Item = A> {
+            self.0.extend(iter)
+    }
 }
 
 impl<'a, T, Sep> IntoIterator for &'a List<T, Sep> {
