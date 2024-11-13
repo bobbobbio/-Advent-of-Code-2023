@@ -1,6 +1,6 @@
 use anyhow::{anyhow, bail, Context as _, Result};
 use clap::{Parser, Subcommand};
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use std::collections::HashMap;
 use std::fs;
 use std::io::{BufRead as _, BufReader};
@@ -263,28 +263,20 @@ const REMOTE_MESSAGES: [&str; 6] = [
     FAIL_TIMEOUT,
 ];
 
-#[derive(Debug, Serialize)]
-struct AnswerBody {
-    answer: String,
-    level: u32,
-}
-
 fn send_answer(day: u32, part: u32, result: &str, dry_run: bool) -> Result<Option<String>> {
     let year = aoc_year()?;
     let url = format!("https://adventofcode.com/{year}/day/{day}/answer");
-    let body = AnswerBody {
-        answer: result.into(),
-        level: part,
-    };
+    let body = format!("level={part}&answer={result}");
     if dry_run {
-        println!("POST {url} {body:?}");
+        println!("POST {url} {body}");
         Ok(None)
     } else {
         let client = reqwest::blocking::Client::new();
         let resp = client
             .post(url)
+            .header("Content-Type", "application/x-www-form-urlencoded")
             .header("cookie", format!("session={}", aoc_token()?))
-            .json(&body)
+            .body(body)
             .send()?;
         Ok(Some(resp.text()?))
     }
