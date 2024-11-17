@@ -579,8 +579,33 @@ impl<CellT: parse::HasParser> parse::HasParser for Grid<CellT> {
     #[parse::prelude::into_parser]
     fn parser() -> _ {
         use parse::prelude::*;
-        many1(Vec::<CellT>::parser().skip(string("\n"))).map(|rows| Self::new(rows).unwrap())
+        use combine::error::Commit;
+
+        combine::parser(|input: &mut Input| {
+            let position = input.position();
+            let mut parser = many1::<Vec<Vec<_>>, _, _>(many1(CellT::parser()).skip(string("\n")));
+            let (rows, committed) = parser.parse_stream(input).into_result()?;
+            if let Some(grid) = Grid::new(rows) {
+                Ok((grid, committed))
+            } else {
+                let mut errors = Input::Error::empty(position);
+                errors.add_message("inconsistent grid row length");
+                Err(Commit::Peek(errors.into()))
+            }
+        })
     }
+}
+
+#[test]
+fn grid_new() {
+    assert!(Grid::new(vec![vec![1, 2], vec![1, 2, 3]]).is_none());
+    assert!(Grid::<i32>::new(vec![vec![], vec![]]).is_none());
+
+    let empty_grid = Grid::<i32>::new(vec![]).unwrap();
+    assert!(empty_grid.is_empty());
+
+    let non_empty_grid = Grid::new(vec![vec![1, 2, 3]]).unwrap();
+    assert!(!non_empty_grid.is_empty());
 }
 
 #[test]
@@ -871,7 +896,7 @@ fn grid_mut_indexing() {
 }
 
 #[cfg(test)]
-#[derive(parse::prelude::HasParser)]
+#[derive(Debug, parse::prelude::HasParser)]
 enum Entry {
     #[parse(string = "A")]
     A,
@@ -893,4 +918,12 @@ impl fmt::Display for Entry {
 fn grid_parse_display() {
     let grid: Grid<Entry> = parse::parse_str("AB\nBB\nAA\n").unwrap();
     assert_eq!(grid.to_string(), "AB\nBB\nAA\n");
+
+    let grid: Grid<Entry> = Grid::new(vec![]).unwrap();
+    assert_eq!(grid.to_string(), "<empty>\n");
+}
+
+#[test]
+fn grid_parse_error() {
+    parse::parse_str::<Grid<Entry>>("AB\nBB\nAAC\n").unwrap_err();
 }
