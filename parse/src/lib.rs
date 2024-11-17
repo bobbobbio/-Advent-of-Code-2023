@@ -10,6 +10,8 @@ use std::{
     slice, str, vec,
 };
 
+extern crate self as parse;
+
 pub mod prelude {
     pub use super::*;
     pub use combine::parser::char::*;

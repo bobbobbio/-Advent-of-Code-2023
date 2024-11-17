@@ -45,7 +45,7 @@ fn into_parser_inner(input: TokenStream) -> Result<TokenStream> {
     let name = input.sig.ident;
     let block = input.block;
     Ok(quote! {
-        fn #name<Input>() -> impl Parser<Input, Output = Self>
+        fn #name<Input>() -> impl ::parse::prelude::Parser<Input, Output = Self>
         where
             Input: ::combine::Stream<Token = char>,
         #block
@@ -70,7 +70,7 @@ fn derive_has_parser_struct(
 
     Ok(parse_quote! {
         impl ::parse::HasParser for #name {
-            #[into_parser]
+            #[::parse::prelude::into_parser]
             fn parser() -> _ {
                 #parser_expr
             }
@@ -88,7 +88,7 @@ fn parse_expr_for_struct(
 
     if fields.is_empty() {
         let parser = get_unit_parser_from_attrs(name_parser(&name), attrs)?;
-        Ok(parse_quote!(#parser.map(|_| #self_expr)))
+        Ok(parse_quote!(::parse::prelude::Parser::map(#parser, |_| #self_expr)))
     } else {
         let mut patterns: Vec<Pat> = vec![];
         let mut field_names: Vec<Ident> = vec![];
@@ -105,7 +105,9 @@ fn parse_expr_for_struct(
             let default_parser_expr = parse_quote!(<#ty as ::parse::HasParser>::parser());
             let parser_expr = get_field_parser_from_attrs(default_parser_expr, f.attrs.clone())?;
             if fields_iter.peek().is_some() {
-                parsers.push(parse_quote!(#parser_expr.skip(#sep_parser)));
+                parsers.push(parse_quote! {
+                    ::parse::prelude::Parser::skip(#parser_expr, #sep_parser)
+                });
             } else {
                 parsers.push(parser_expr);
             }
@@ -132,7 +134,7 @@ fn parse_expr_for_struct(
         };
 
         Ok(parse_quote! {
-            #parser_expr.map(#map_closure)
+            ::parse::prelude::Parser::map(#parser_expr, #map_closure)
         })
     }
 }
@@ -141,7 +143,7 @@ fn get_unit_parser_from_attrs(default_parser: Expr, attrs: Vec<syn::Attribute>) 
     let attr_map = attrs::parse_attr_map::<attrs::VariantKeyword>(attrs)?;
 
     if let Some(value) = attr_map.get(&attrs::VariantKeyword::String) {
-        Ok(parse_quote!(string(#value)))
+        Ok(parse_quote!(::parse::prelude::string(#value)))
     } else {
         Ok(default_parser)
     }
@@ -152,7 +154,7 @@ fn get_separator_parser_from_attrs(
     attr_map: &BTreeMap<attrs::ContainerKeyword, LitStr>,
 ) -> Expr {
     if let Some(value) = attr_map.get(&attrs::ContainerKeyword::SepBy) {
-        parse_quote!(string(#value))
+        parse_quote!(::parse::prelude::string(#value))
     } else {
         default_parser
     }
@@ -165,11 +167,13 @@ fn get_struct_parser_from_attrs(
     let mut parser = default_parser;
 
     if let Some(value) = attr_map.get(&attrs::ContainerKeyword::Before) {
-        parser = parse_quote!(string(#value).with(#parser));
+        parser = parse_quote!(::parse::prelude::string(#value).with(#parser));
     }
 
     if let Some(value) = attr_map.get(&attrs::ContainerKeyword::After) {
-        parser = parse_quote!(#parser.skip(string(#value)));
+        parser = parse_quote! {
+            ::parse::prelude::Parser::skip(#parser, ::parse::prelude::string(#value))
+        };
     }
 
     parser
@@ -181,11 +185,13 @@ fn get_field_parser_from_attrs(default_parser: Expr, attrs: Vec<syn::Attribute>)
     let mut parser = default_parser;
 
     if let Some(value) = attr_map.get(&attrs::FieldKeyword::Before) {
-        parser = parse_quote!(string(#value).with(#parser));
+        parser = parse_quote!(::parse::prelude::string(#value).with(#parser));
     }
 
     if let Some(value) = attr_map.get(&attrs::FieldKeyword::After) {
-        parser = parse_quote!(#parser.skip(string(#value)));
+        parser = parse_quote! {
+            ::parse::prelude::Parser::skip(#parser, ::parse::prelude::string(#value))
+        };
     }
 
     Ok(parser)
@@ -193,7 +199,7 @@ fn get_field_parser_from_attrs(default_parser: Expr, attrs: Vec<syn::Attribute>)
 
 fn name_parser(name: &Ident) -> Expr {
     let name = name.to_string().to_snake_case();
-    parse_quote!(string(#name))
+    parse_quote!(::parse::prelude::string(#name))
 }
 
 fn derive_has_parser_enum(name: Ident, data: DataEnum) -> Result<ItemImpl> {
@@ -201,13 +207,13 @@ fn derive_has_parser_enum(name: Ident, data: DataEnum) -> Result<ItemImpl> {
     for v in data.variants {
         let name = v.ident;
         let parser = parse_expr_for_struct(parse_quote!(Self::#name), name, v.attrs, v.fields)?;
-        parsers.push(parse_quote!(attempt(#parser)));
+        parsers.push(parse_quote!(::parse::prelude::attempt(#parser)));
     }
     Ok(parse_quote! {
         impl ::parse::HasParser for #name {
-            #[into_parser]
+            #[::parse::prelude::into_parser]
             fn parser() -> _ {
-                choice((#(#parsers),*))
+                ::parse::prelude::choice((#(#parsers),*))
             }
         }
     })

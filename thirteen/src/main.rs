@@ -1,27 +1,12 @@
 use advent::prelude::*;
 use std::cmp::min;
 
-#[derive(Clone, Debug, HasParser, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, HasParser, PartialEq, Eq)]
 enum RockOrAsh {
     #[parse(string = "#")]
     Rock,
     #[parse(string = ".")]
     Ash,
-}
-
-#[derive(HasParser)]
-struct Grid(List<List<RockOrAsh, Nil>, TermWith<NewLine>>);
-
-impl Grid {
-    fn rows(&self) -> impl Iterator<Item = impl DoubleEndedIterator<Item = RockOrAsh> + '_> + '_ {
-        self.0.iter().map(|row| row.iter().cloned())
-    }
-
-    fn columns(
-        &self,
-    ) -> impl Iterator<Item = impl DoubleEndedIterator<Item = RockOrAsh> + '_> + '_ {
-        (0..(self.0[0].len())).map(|c_i| self.0.iter().map(move |row| row[c_i].clone()))
-    }
 }
 
 fn cmp_sub(
@@ -99,12 +84,12 @@ fn find_reflections(lines: Vec<Vec<RockOrAsh>>, smudge: bool) -> HashSet<usize> 
         .collect()
 }
 
-fn solve(grids: List<Grid, SepBy<NewLine>>, smudge: bool) -> usize {
+fn solve(grids: List<Grid<RockOrAsh>, SepBy<NewLine>>, smudge: bool) -> usize {
     let mut vertical = vec![];
     let mut horizontal = vec![];
     for grid in grids {
-        let v = find_reflections(grid.rows().map(Vec::from_iter).collect(), smudge);
-        let h = find_reflections(grid.columns().map(Vec::from_iter).collect(), smudge);
+        let v = find_reflections(grid.rows().map(|r| r.to_vec()).collect(), smudge);
+        let h = find_reflections(grid.columns().map(|c| c.to_vec()).collect(), smudge);
 
         assert!(!(v.is_empty() && h.is_empty()));
 
@@ -119,12 +104,12 @@ fn solve(grids: List<Grid, SepBy<NewLine>>, smudge: bool) -> usize {
 }
 
 #[part_one]
-fn part_one(grids: List<Grid, SepBy<NewLine>>) -> usize {
+fn part_one(grids: List<Grid<RockOrAsh>, SepBy<NewLine>>) -> usize {
     solve(grids, false)
 }
 
 #[part_two]
-fn part_two(grids: List<Grid, SepBy<NewLine>>) -> usize {
+fn part_two(grids: List<Grid<RockOrAsh>, SepBy<NewLine>>) -> usize {
     solve(grids, true)
 }
 
