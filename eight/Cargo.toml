@@ -7,6 +7,6 @@ edition = "2021"
 
 [dependencies]
 num = "*"
-advent = { path = "../advent" }
-parse = { path = "../parse" }
-combine = "*"
+advent.workspace = true
+parse.workspace = true
+combine.workspace = true

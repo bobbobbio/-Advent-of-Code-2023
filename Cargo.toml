@@ -1,19 +1,7 @@
-[profile.dev]
-debug = true
-lto = "thin"
-opt-level = 3
-panic = "abort"
-
-[profile.release]
-debug = true
-lto = "thin"
-opt-level = 3
-panic = "abort"
-
 [workspace]
 members = [
-    "advent",
-    "advent_macro",
+    "support/advent",
+    "support/advent_macro",
     "eight",
     "eleven",
     "five",
@@ -21,8 +9,8 @@ members = [
     "fourteen",
     "nine",
     "one",
-    "parse",
-    "parse_macro",
+    "support/parse",
+    "support/parse_macro",
     "seven",
     "six",
     "ten",
@@ -32,3 +20,10 @@ members = [
     "two",
 ]
 resolver = "2"
+
+[workspace.dependencies]
+advent = { path = "support/advent" }
+advent_macro = { path = "support/advent_macro" }
+combine = "4.6.7"
+parse = { path = "support/parse" }
+parse_macro = { path = "support/parse_macro" }

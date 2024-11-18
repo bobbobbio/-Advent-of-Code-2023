@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-advent = { path = "../advent" }
+advent.workspace = true
+combine.workspace = true
+parse.workspace = true
 text2num = "=2.1.4"
-parse = { path = "../parse" }
-combine = "*"
